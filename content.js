@@ -1399,14 +1399,17 @@
   }
 
   function readBookingSearchData() {
-    return {
-      destination: simpleDestinationName(getDestination()),
-      dates: getTripDatesFromPageOnly() || getTripDates(),
-      pageUrl: window.location.href,
-      sourceSite: getSiteName(),
-      savedAt: new Date().toISOString()
-    };
-  }
+      const destination = normalizeDestinationDisplayText(getDestination());
+
+      return {
+        destination,
+        rawDestination: destination,
+        dates: getTripDatesFromPageOnly() || getTripDates(),
+        pageUrl: window.location.href,
+        sourceSite: getSiteName(),
+        savedAt: new Date().toISOString()
+      };
+    }
 
   async function getSavedSearches() {
     const result = await chrome.storage.local.get([STORAGE_KEY]);
@@ -1642,7 +1645,7 @@
 
     try {
       const data = sourceData || readBookingSearchData();
-      const rawDestination = simpleDestinationName(data.destination || getDestination());
+      const rawDestination = normalizeDestinationDisplayText(data.rawDestination || data.destination || getDestination());
       if (!rawDestination) {
         showDestinationError("Destination not detected");
         return false;
@@ -1661,6 +1664,7 @@
         name: existingIndex >= 0 ? searches[existingIndex].name : `search #${searches.length + 1}`,
         destination: displayDestination,
         rawDestination,
+        geocodeQuery: rawDestination,
         dates,
         pageUrl: data.pageUrl || window.location.href,
         sourceSite: data.sourceSite || getSiteName(),
@@ -1759,7 +1763,7 @@
 
   async function prefetchWeatherForSavedSearch(search, knownLocation, options = {}) {
     try {
-      const location = knownLocation || search.location || await geocodeDestination(search.destination);
+      const location = search.location || await geocodeDestination(search.geocodeQuery || search.rawDestination || search.destination);
       if (!location) {
         if (options.updateToast) updateSavedToastPreview("Saved. Weather will load during comparison.");
         return null;
@@ -2472,14 +2476,28 @@
   async function geocodeOpenMeteo(destination) {
     const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
     url.searchParams.set("name", destination);
-    url.searchParams.set("count", "1");
+    url.searchParams.set("count", "5");
     url.searchParams.set("language", getUserLanguage());
     url.searchParams.set("format", "json");
     const response = await fetch(url);
     if (!response.ok) throw new Error("Open-Meteo geocoding failed");
     const data = await response.json();
-    const result = data.results?.[0];
-    return normalizeGeocodedLocation(result && { ...result, source: "Open-Meteo geocoding" });
+    const results = data.results || [];
+    const lower = normalizeLabelToken(destination);
+
+    const preferred = results.find((item) => {
+      const country = normalizeLabelToken(item.country || "");
+      const code = normalizeLabelToken(item.country_code || "");
+      return (
+        lower.includes(country) ||
+        lower.includes(code) ||
+        lower.includes("uk") && code === "gb" ||
+        lower.includes("united kingdom") && code === "gb"
+      );
+    });
+
+const result = preferred || results[0];
+return normalizeGeocodedLocation(result && { ...result, source: "Open-Meteo geocoding" });
   }
 
   async function geocodeNominatim(destination) {
@@ -3523,8 +3541,7 @@
     return `<tr class="wtn-scored-row ${bestRowClass}" style="--wtn-score-color:${scoreColor}">
           <td><div class="wtn-city">${escapeHtml(formatDestinationLabel(item.search, item.location, showCountryNames))}</div></td>
           <td><div class="wtn-score-number">${item.weatherScore.comfortScore}</div></td>
-          <td class="wtn-temp-cell" title="Air temperature: ${item.weatherScore.avgMaxTemp}°C"><div class="wtn-temp-wrap"><span class="wtn-temp-value" style="left:${marker}%">${item.weatherScore.avgFeelsLikeMax || item.weatherScore.avgMaxTemp}°C</span><span class="wtn-temp-bar"><span class="wtn-temp-marker" style="left:${marker}%"></span></span><div class="wtn-temp-status">${escapeHtml(item.weatherScore.heatDanger ? `${item.weatherScore.goodHeatPercent || 0}% good · ${Math.round((item.weatherScore.dangerHeatShare || 0) * 100)}% danger` : `${item.weatherScore.goodHeatPercent || 0}% good`)}</div></div></td>
-          <td><span class="wtn-weather-number">Dry ${item.weatherScore.dryTimePercent ?? Math.max(0, 100 - item.weatherScore.avgRain)}%</span></td>
+          <td class="wtn-temp-cell" title="Air temperature: ${item.weatherScore.avgMaxTemp}°C"><div class="wtn-temp-wrap"><span class="wtn-temp-value" style="left:${marker}%">${item.weatherScore.avgFeelsLikeMax || item.weatherScore.avgMaxTemp}°C</span><span class="wtn-temp-bar"><span class="wtn-temp-marker" style="left:${marker}%"></span></span></div></td>          <td><span class="wtn-weather-number">Dry ${item.weatherScore.dryTimePercent ?? Math.max(0, 100 - item.weatherScore.avgRain)}%</span></td>
           <td class="wtn-sun-cell"><span class="wtn-sun-icons">${sunCloudIcons(item.weatherScore)}</span><span class="wtn-sun-hours">${sunPct}%</span></td>
           <td class="wtn-wind-cell" title="${item.weatherScore.avgWind} km/h average daytime wind"><div class="wtn-wind-wrap"><span class="wtn-wind-value" style="left:${windMarker}%">${item.weatherScore.avgWind} km/h</span><span class="wtn-wind-bar"><span class="wtn-wind-marker" style="left:${windMarker}%"></span></span><div class="wtn-temp-status">${item.weatherScore.calmWindPercent ?? 0}% calm</div></div></td>
           <td><div class="wtn-date">${escapeHtml(formatDateRange(item.search.dates))}</div><div class="wtn-date-mode">${item.weatherScore.mode === "monthly-stats" ? "climate statistics" : "weather forecast"}</div></td>
