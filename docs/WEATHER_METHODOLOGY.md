@@ -98,7 +98,7 @@ For forecast-based comparisons, Clear Sky Watch evaluates rain, wind, sun and cl
 
 From v1.11.65, Clear Sky Watch avoids average-only scoring because averages can make different cities look identical. For forecast rows, it evaluates local daytime hours only and calculates the share of favourable time:
 
-- **Dry time**: daytime hours with precipitation probability below 30%.
+- **No rain*: daytime hours with precipitation probability below 30%.
 - **Good heat**: daytime hours with feels-like / heat-index temperature between 20°C and 28°C.
 - **Danger heat**: daytime hours with feels-like / heat-index temperature above 35°C.
 - **Calm wind**: daytime hours with wind speed below 36 km/h.
