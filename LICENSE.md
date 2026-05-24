@@ -7,6 +7,8 @@ Product owner: [Demetra](https://www.pappers.fr/entreprise/demetra-941049322)
 Technology and intellectual property owner: [Demetra](https://www.pappers.fr/entreprise/demetra-941049322)
 Licence contact / attribution: [Elena Maksimovich](https://www.linkedin.com/in/elena-maksimovich/)
 
+Welcome to contribute to this project via github: weathertradenet/clear-sky-watch.git and via Reddit !
+
 This software, including source code, design, user interface, data processing logic, weather comparison methodology, documentation, and related materials, is proprietary technology owned by [Demetra](https://www.pappers.fr/entreprise/demetra-941049322).
 
 No rights are granted to copy, modify, distribute, sublicense, sell, publish, reverse engineer, or commercially exploit this software without prior written permission from [Demetra](https://www.pappers.fr/entreprise/demetra-941049322).

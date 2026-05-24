@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Clear Sky Watch",
   "version": "1.0",
-  "description": "Save destinations from travel sites and compare forecasts or typical monthly weather.",
+  "description": "Compare weather forecasts between different destinations and dates. Contribute to this project via github: weathertradenet/clear-sky-watch.git and via Reddit",
   "permissions": [
     "storage",
     "activeTab",
