@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clear Sky Watch</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="popup">
+      <header class="header">
+        <h1><img class="brand-logo" src="icons/umbrella.svg" alt="" aria-hidden="true" />Clear Sky Watch</h1>
+        <p>Save destinations, then compare weather</p>
+      </header>
+      <div class="actions">
+        <button id="addDestinationBtn" class="btn btn-yellow">Save destination</button>
+        <button id="compareDestinationsBtn" class="btn btn-blue" hidden>Compare destinations</button>
+      </div>
+      <section>
+        <div class="section-title-row">
+          <h2>Selected destinations</h2>
+          <a id="clearBtn" class="clear-link">Clear ALL</a>
+        </div>
+        <div id="savedSearches" class="list"></div>
+      </section>
+      <details class="api-settings">
+        <summary>Optional fallback weather APIs</summary>
+        <label>WeatherAPI.com key</label>
+        <input id="weatherApiKeyInput" class="api-input" placeholder="optional API key" />
+        <label>OpenWeather key</label>
+        <input id="openWeatherKeyInput" class="api-input" placeholder="optional API key" />
+        <button id="saveApiKeysBtn" class="btn btn-secondary">Save API keys</button>
+        <p class="api-note">Open-Meteo, OpenStreetMap/Photon geocoding, and MET Norway are tried automatically. Optional keys add WeatherAPI.com and OpenWeather fallback coverage.</p>
+      </details>
+      <p class="hint">For the best experience, use the floating panel on your travel search page.</p>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
